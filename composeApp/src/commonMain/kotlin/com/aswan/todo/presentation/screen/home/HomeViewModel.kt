@@ -1,13 +1,10 @@
-package com.aswan.todo.presentation.screen
+package com.aswan.todo.presentation.screen.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aswan.todo.data.ToDoRepository
-import com.aswan.todo.domain.ToDoTask
 import com.aswan.todo.util.RequestState
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
 class HomeViewModel(

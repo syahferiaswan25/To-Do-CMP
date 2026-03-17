@@ -3,7 +3,7 @@ package com.aswan.todo.di
 import com.aswan.todo.data.FakeToDoRepository
 import com.aswan.todo.data.ToDoRepository
 import com.aswan.todo.navigation.Navigator
-import com.aswan.todo.presentation.screen.HomeViewModel
+import com.aswan.todo.presentation.screen.home.HomeViewModel
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.singleOf

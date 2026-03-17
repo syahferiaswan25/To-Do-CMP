@@ -1,4 +1,4 @@
-package com.aswan.todo.presentation.screen
+package com.aswan.todo.presentation.screen.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -67,10 +67,7 @@ fun HomeScreen(
         }
     ) { padding ->
         allTasks.DisplayResult(
-            modifier = Modifier.padding(
-                top = padding.calculateTopPadding(),
-                bottom = padding.calculateBottomPadding(),
-            ),
+            modifier = Modifier.padding(padding),
             onLoading = { LoadingCard() },
             onSuccess = { tasks ->
                 if (tasks.isNotEmpty()) {
@@ -84,9 +81,7 @@ fun HomeScreen(
                         ) {
                             TaskCard(
                                 task = it,
-                                onClick = {
-
-                                }
+                                onClick = navigateToTask
                             )
                         }
                     }

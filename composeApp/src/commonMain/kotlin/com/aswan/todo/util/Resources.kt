@@ -18,7 +18,7 @@ import to_do_cmp.composeapp.generated.resources.sort
 import to_do_cmp.composeapp.generated.resources.warning_dark
 import to_do_cmp.composeapp.generated.resources.warning_light
 
-object Resources {
+object Resource {
 
     object Icon {
         val BACK_ARROW = Res.drawable.arrow_back

@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.aswan.todo.util.Resources
+import com.aswan.todo.util.Resource
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -29,8 +29,8 @@ fun InfoCard(
     message: String,
     containerColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
-    lightModeIcon: DrawableResource = Resources.Image.PEN_PAPER_LIGHT,
-    darkModeIcon: DrawableResource = Resources.Image.PEN_PAPER_DARK,
+    lightModeIcon: DrawableResource = Resource.Image.PEN_PAPER_LIGHT,
+    darkModeIcon: DrawableResource = Resource.Image.PEN_PAPER_DARK,
 ) {
     Column(
         modifier = modifier

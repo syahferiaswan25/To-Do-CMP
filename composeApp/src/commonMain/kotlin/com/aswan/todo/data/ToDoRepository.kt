@@ -9,6 +9,6 @@ interface ToDoRepository {
     fun createTask(task: ToDoTask): RequestState<Unit>
     fun updateTask(task: ToDoTask): RequestState<Unit>
     fun readSelectedTask(taskId: String): RequestState<ToDoTask>
-    fun readAllTask(context: CoroutineContext): Flow<RequestState<List<ToDoTask>>>
+    fun readAllTask(/*context: CoroutineContext*/): Flow<RequestState<List<ToDoTask>>>
     fun removeTask(taskId: String): Flow<RequestState<ToDoTask>>
 }

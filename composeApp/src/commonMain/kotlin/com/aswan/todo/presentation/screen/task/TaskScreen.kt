@@ -24,11 +24,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aswan.todo.domain.Priority
+import com.aswan.todo.presentation.component.PriorityChip
+import com.aswan.todo.presentation.component.PriorityChipSize
 import com.aswan.todo.util.Alpha
 import com.aswan.todo.util.Resource
 import org.jetbrains.compose.resources.painterResource
@@ -39,6 +46,8 @@ fun TaskScreen(
     id: String?,
     navigateBack: () -> Unit
 ) {
+    var selectedPriority by remember { mutableStateOf(Priority.Low) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -57,8 +66,10 @@ fun TaskScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding(),
-                    bottom = paddingValues.calculateBottomPadding() + 10.dp)
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    bottom = paddingValues.calculateBottomPadding() + 10.dp
+                )
                 .windowInsetsPadding(WindowInsets.ime)
         ) {
             Column(
@@ -84,39 +95,9 @@ fun TaskScreen(
                     maxLines = 6,
                 )
 
-                TaskInputSection(
-                    title = "Task Title",
-                    value = "",
-                    onValueChange = {},
-                    placeholder = "Enter task title",
-                    isRequired = true,
-                )
-
-                TaskInputSection(
-                    title = "Task Description",
-                    value = "",
-                    onValueChange = {},
-                    placeholder = "Enter task description",
-                    minLines = 3,
-                    maxLines = 6,
-                )
-
-
-                TaskInputSection(
-                    title = "Task Title",
-                    value = "",
-                    onValueChange = {},
-                    placeholder = "Enter task title",
-                    isRequired = true,
-                )
-
-                TaskInputSection(
-                    title = "Task Description",
-                    value = "",
-                    onValueChange = {},
-                    placeholder = "Enter task description",
-                    minLines = 3,
-                    maxLines = 6,
+                PrioritySection(
+                    selectedPriority = selectedPriority,
+                    onPrioritySelected = { selectedPriority = it }
                 )
             }
 
@@ -124,7 +105,7 @@ fun TaskScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .padding(horizontal = 16.dp, ),
+                    .padding(horizontal = 16.dp),
                 onClick = {}
             )
             {
@@ -177,6 +158,30 @@ fun TaskInputSection(
             minLines = minLines,
             maxLines = maxLines,
         )
+    }
+}
+
+@Composable
+private fun PrioritySection(
+    selectedPriority: Priority,
+    onPrioritySelected: (Priority) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "Priority",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Priority.entries.forEach { priority ->
+                PriorityChip(
+                    priority = priority,
+                    size = PriorityChipSize.Large,
+                    isSelected = priority == selectedPriority,
+                    onSelect = onPrioritySelected,
+                )
+            }
+        }
     }
 }
 

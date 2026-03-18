@@ -2,6 +2,7 @@ package com.aswan.todo.presentation.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,20 +25,25 @@ fun PriorityChip(
     priority: Priority,
     size: PriorityChipSize = PriorityChipSize.Medium,
     isCompleted: Boolean = false,
+    isSelected: Boolean = false,
+    onSelect: ((Priority) -> Unit)? = null,
 ) {
     val padding = size.toPadding()
+    val shouldUseOutline = if (onSelect != null) !isSelected else isCompleted
+    val chipColor = if (shouldUseOutline) MaterialTheme.colorScheme.outline else priority.getColor()
+
     Text(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(
-                if (isCompleted) MaterialTheme.colorScheme.outline
-                else priority.getColor()
+            .then(
+                if (onSelect != null) Modifier.clickable { onSelect(priority) }
+                else Modifier
             )
+            .background(chipColor)
             .border(
                 width = 1.dp,
                 shape = RoundedCornerShape(8.dp),
-                color = if (isCompleted) MaterialTheme.colorScheme.outline
-                else priority.getColor()
+                color = chipColor
             )
             .padding(
                 horizontal = padding.horizontal,

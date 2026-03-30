@@ -1,6 +1,7 @@
 package com.aswan.todo
 
 import android.os.Bundle
+import android.os.StrictMode
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,6 +16,15 @@ class MainActivity : ComponentActivity() {
         setContent {
             App()
         }
+
+        StrictMode.setThreadPolicy(
+            StrictMode.ThreadPolicy.Builder()
+                .detectDiskReads()
+                .detectDiskWrites()
+                .penaltyLog()
+                .penaltyFlashScreen()
+                .build()
+        )
     }
 }
 

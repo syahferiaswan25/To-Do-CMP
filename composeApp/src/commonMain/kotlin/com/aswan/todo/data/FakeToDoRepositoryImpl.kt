@@ -6,9 +6,8 @@ import com.aswan.todo.domain.ToDoTask
 import com.aswan.todo.util.RequestState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import kotlin.coroutines.CoroutineContext
 
-class FakeToDoRepository : ToDoRepository {
+class FakeToDoRepositoryImpl : ToDoRepository {
     private val tasks = mutableStateListOf<ToDoTask>()
 
     init {

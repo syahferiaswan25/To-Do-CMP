@@ -12,10 +12,15 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -25,58 +30,108 @@ import androidx.compose.ui.unit.dp
 import com.aswan.todo.domain.Priority
 import com.aswan.todo.domain.ToDoTask
 import com.aswan.todo.util.Alpha
+import com.aswan.todo.util.Resource
+import com.stevdza_san.swipeable.Swipeable
+import com.stevdza_san.swipeable.domain.ActionAnimationConfig
+import com.stevdza_san.swipeable.domain.ActionCustomization
+import com.stevdza_san.swipeable.domain.SwipeAction
+import com.stevdza_san.swipeable.domain.SwipeBackground
+import com.stevdza_san.swipeable.domain.SwipeBehavior
+import com.stevdza_san.swipeable.domain.SwipeDirection
 
 @Composable
 fun TaskCard(
     modifier: Modifier = Modifier,
     task: ToDoTask,
     onClick: (String) -> Unit,
+    onComplete: () -> Unit,
+    onDelete: () -> Unit,
 ) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { onClick(task.id) },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+    var progressState by remember { mutableStateOf(0f) }
+    var directionState by remember { mutableStateOf<SwipeDirection?>(null) }
+
+    Swipeable(
+        modifier = modifier,
+        direction = SwipeDirection.BOTH,
+        behavior = SwipeBehavior.DISMISS,
+        threshold = 0.7f,
+        leftDismissAction =
+            SwipeAction(
+                customization = ActionCustomization(
+                    icon = Resource.Icon.CHECK_BOX,
+                    iconSize = 24.dp,
+                    iconColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    containerColor = Color.Transparent
+                ),
+                onAction = onComplete,
+                label = "Complete action"
+            ),
+        rightDismissAction = SwipeAction(
+            customization = ActionCustomization(
+                icon = Resource.Icon.DELETE,
+                iconSize = 24.dp,
+                iconColor = MaterialTheme.colorScheme.errorContainer,
+                containerColor = Color.Transparent
+            ),
+            onAction = onDelete,
+            label = "Delete action"
         ),
-        elevation = CardDefaults.cardElevation(0.dp)
+        shape = RoundedCornerShape(16.dp),
+        actionAnimation = if (directionState == SwipeDirection.RIGHT) ActionAnimationConfig.SlideLeft
+        else ActionAnimationConfig.SlideRight,
+        onSwipeProgress = { progress, direction ->
+            progressState = progress
+            directionState = direction
+        },
+        leftBackground = SwipeBackground.solid(MaterialTheme.colorScheme.tertiary),
+        rightBackground = SwipeBackground.solid(MaterialTheme.colorScheme.error)
     ) {
-        Row(
+        Card(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(all = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .clip(RoundedCornerShape(16.dp))
+                .clickable { onClick(task.id) },
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
+            ),
+            elevation = CardDefaults.cardElevation(0.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    modifier = modifier
-                        .alpha(if (task.isCompleted) Alpha.HALF else Alpha.FULL),
-                    text = task.title,
-                    style = TextStyle(
-                        fontSize = MaterialTheme.typography.titleMedium.fontSize,
-                        fontWeight = FontWeight.Medium,
-                        textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                if (task.description.isNotEmpty())
+            Row(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(all = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         modifier = modifier
                             .alpha(if (task.isCompleted) Alpha.HALF else Alpha.FULL),
-                        text = task.description,
-                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
+                        text = task.title,
+                        style = TextStyle(
+                            fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                            fontWeight = FontWeight.Medium,
+                            textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
+
+                    if (task.description.isNotEmpty())
+                        Text(
+                            modifier = modifier
+                                .alpha(if (task.isCompleted) Alpha.HALF else Alpha.FULL),
+                            text = task.description,
+                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                }
+                PriorityChip(
+                    priority = task.priority,
+                    isCompleted = task.isCompleted
+                )
             }
-            PriorityChip(
-                priority = task.priority,
-                isCompleted = task.isCompleted
-            )
         }
     }
 }
@@ -91,7 +146,9 @@ private fun TaskCardCompletePreview() {
             isCompleted = true,
             priority = Priority.Low
         ),
-        onClick = {}
+        onClick = {},
+        onComplete = {},
+        onDelete = {}
     )
 }
 
@@ -105,6 +162,8 @@ private fun TaskCardNoCompletePreview() {
             isCompleted = false,
             priority = Priority.Low
         ),
-        onClick = {}
+        onClick = {},
+        onComplete = {},
+        onDelete = {}
     )
 }

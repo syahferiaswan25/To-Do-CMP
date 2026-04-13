@@ -21,12 +21,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import com.aswan.todo.domain.Priority
 import com.aswan.todo.domain.ToDoTask
 import com.aswan.todo.util.Alpha
@@ -58,9 +60,11 @@ fun TaskCard(
         leftDismissAction =
             SwipeAction(
                 customization = ActionCustomization(
-                    icon = Resource.Icon.CHECK_BOX,
+                    icon = if (! task.isCompleted) Resource.Icon.CHECK_BOX else Resource.Icon.BLANK_BOX,
                     iconSize = 24.dp,
-                    iconColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    iconColor = if (! task.isCompleted) MaterialTheme.colorScheme.onTertiary
+                    else MaterialTheme.colorScheme.onSecondary,
+
                     containerColor = Color.Transparent
                 ),
                 onAction = onComplete,
@@ -70,7 +74,7 @@ fun TaskCard(
             customization = ActionCustomization(
                 icon = Resource.Icon.DELETE,
                 iconSize = 24.dp,
-                iconColor = MaterialTheme.colorScheme.errorContainer,
+                iconColor = MaterialTheme.colorScheme.onError ,
                 containerColor = Color.Transparent
             ),
             onAction = onDelete,
@@ -83,7 +87,9 @@ fun TaskCard(
             progressState = progress
             directionState = direction
         },
-        leftBackground = SwipeBackground.solid(MaterialTheme.colorScheme.tertiary),
+        leftBackground = if (! task.isCompleted) SwipeBackground.solid(MaterialTheme.colorScheme.tertiary)
+        else SwipeBackground.solid(MaterialTheme.colorScheme.secondary),
+
         rightBackground = SwipeBackground.solid(MaterialTheme.colorScheme.error)
     ) {
         Card(
@@ -92,7 +98,20 @@ fun TaskCard(
                 .clip(RoundedCornerShape(16.dp))
                 .clickable { onClick(task.id) },
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer
+                containerColor = if (directionState == SwipeDirection.LEFT) {
+                    lerp(
+                        start = MaterialTheme.colorScheme.surfaceContainer,
+                        stop = MaterialTheme.colorScheme.errorContainer,
+                        fraction = progressState.coerceIn(0f, 1f)
+                    )
+                } else {
+                    lerp(
+                        start = MaterialTheme.colorScheme.surfaceContainer,
+                        stop = if (task.isCompleted) MaterialTheme.colorScheme.secondaryContainer
+                        else MaterialTheme.colorScheme.tertiaryContainer,
+                        fraction = progressState.coerceIn(0f, 1f)
+                    )
+                }
             ),
             elevation = CardDefaults.cardElevation(0.dp)
         ) {

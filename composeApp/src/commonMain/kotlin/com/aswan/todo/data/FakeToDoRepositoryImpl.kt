@@ -46,7 +46,7 @@ class FakeToDoRepositoryImpl : ToDoRepository {
     override fun updateTask(task: ToDoTask): RequestState<Unit> {
         return try {
             val index = tasks.indexOfFirst { it.id == task.id }
-            if (index != -1) {
+            if (index != - 1) {
                 tasks[index] = task
                 RequestState.Success(data = Unit)
             } else {
@@ -78,7 +78,7 @@ class FakeToDoRepositoryImpl : ToDoRepository {
         }
     }
 
-    override fun removeTask(taskId: String): Flow<RequestState<ToDoTask>> {
+    /*override fun removeTask(taskId: String): Flow<RequestState<ToDoTask>> {
         return try {
             val taskToRemove = tasks.find { it.id == taskId }
             if (taskToRemove != null) {
@@ -90,6 +90,20 @@ class FakeToDoRepositoryImpl : ToDoRepository {
         } catch (e: Exception) {
             flowOf(RequestState.Error(message = "Failed to remove task: ${e.message}"))
 
+        }
+    }*/
+
+    override fun removeTask(taskId: String): RequestState<Unit> {
+        return try {
+            val taskToRemove = tasks.find { it.id == taskId }
+            if (taskToRemove != null) {
+                tasks.remove(taskToRemove)
+                RequestState.Success(data = Unit)
+            } else {
+                RequestState.Error(message = "Task with id: $taskId not found")
+            }
+        } catch (e: Exception) {
+            RequestState.Error(message = "Failed to remove task: ${e.message}")
         }
     }
 }

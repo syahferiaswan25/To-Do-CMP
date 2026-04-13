@@ -61,6 +61,7 @@ kotlin {
         }
         iosMain.dependencies {
             //implementation(libs.sqldelight.ios)
+            implementation(libs.navigation2)
         }
     }
 }

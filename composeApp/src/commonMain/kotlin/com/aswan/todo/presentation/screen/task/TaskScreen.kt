@@ -6,6 +6,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import com.aswan.todo.domain.Priority
 import com.aswan.todo.presentation.component.InfoCard
 import com.aswan.todo.presentation.component.LoadingCard
@@ -72,17 +74,22 @@ fun TaskScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text(text = "Task Form") },
-                navigationIcon = {
-                    IconButton(onClick = navigateBack) {
-                        Icon(
-                            painter = painterResource(Resource.Icon.BACK_ARROW),
-                            contentDescription = "Hamburger menu icon"
-                        )
-                    }
+            BoxWithConstraints {
+                val isDualPane = maxWidth >= maxHeight
+                if (!isDualPane) {
+                    TopAppBar(
+                        title = { Text(text = "Task Form") },
+                        navigationIcon = {
+                            IconButton(onClick = navigateBack) {
+                                Icon(
+                                    painter = painterResource(Resource.Icon.BACK_ARROW),
+                                    contentDescription = "Hamburger menu icon"
+                                )
+                            }
+                        }
+                    )
                 }
-            )
+            }
         },
     ) { paddingValues ->
         /*uiState.DisplayResult(

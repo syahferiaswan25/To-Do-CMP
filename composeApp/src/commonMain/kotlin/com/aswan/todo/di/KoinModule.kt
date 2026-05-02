@@ -1,7 +1,7 @@
 package com.aswan.todo.di
 
 import com.aswan.todo.data.FakeToDoRepositoryImpl
-import com.aswan.todo.data.ToDoRepository
+import com.aswan.todo.domain.repository.ToDoRepository
 import com.aswan.todo.navigation.Navigator
 import com.aswan.todo.presentation.screen.home.HomeViewModel
 import com.aswan.todo.presentation.screen.task.TaskViewModel

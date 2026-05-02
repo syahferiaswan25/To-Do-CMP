@@ -1,9 +1,8 @@
-package com.aswan.todo.data
+package com.aswan.todo.domain.repository
 
 import com.aswan.todo.domain.ToDoTask
 import com.aswan.todo.util.RequestState
 import kotlinx.coroutines.flow.Flow
-import kotlin.coroutines.CoroutineContext
 
 interface ToDoRepository {
     fun createTask(task: ToDoTask): RequestState<Unit>

@@ -85,11 +85,13 @@ enum class PriorityChipSize {
 
 object PriorityColors {
     //Light theme color
+    private val lightNone = Color(0xFF0000000)
     private val lightLow = Color(0xFF2E7D32)
     private val lightMedium = Color(0xFFEF6C00)
     private val lightHigh = Color(0xFFC62828)
 
     //Dark theme color
+    private val darkNone = Color(0xFFFFFFFF)
     private val darkLow = Color(0xFF4CAF50)
     private val darkMedium = Color(0xFFFF9800)
     private val darkHigh = Color(0xFFE53935)
@@ -101,6 +103,7 @@ object PriorityColors {
             Priority.Low -> if (isDark) darkLow else lightLow
             Priority.Medium -> if (isDark) darkMedium else lightMedium
             Priority.High -> if (isDark) darkHigh else lightHigh
+            Priority.None -> if (isDark) darkNone else lightNone
         }
     }
 }

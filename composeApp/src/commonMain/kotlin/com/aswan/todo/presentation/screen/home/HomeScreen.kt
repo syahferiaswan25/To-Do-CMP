@@ -6,16 +6,23 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -35,13 +42,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.aswan.todo.domain.Priority
 import com.aswan.todo.presentation.component.InfoCard
 import com.aswan.todo.presentation.component.LoadingCard
+import com.aswan.todo.presentation.component.PriorityColors.getColor
 import com.aswan.todo.presentation.component.TaskCard
 import com.aswan.todo.util.DisplayResult
 import com.aswan.todo.util.Resource
@@ -59,141 +70,163 @@ fun HomeScreen(
     val snackBarHostState = remember { SnackbarHostState() }
     val allTasks by viewModel.allTasks.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val priorityFilter by viewModel.priorityFilter.collectAsStateWithLifecycle()
 
+    var dropdownMenuOpened by remember { mutableStateOf(false) }
     var searchBarOpened by remember { mutableStateOf(false) }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackBarHostState) },
-        topBar = {
-            TopAppBar(
-                title = {
-                    AnimatedContent(
-                        targetState = searchBarOpened
-                    ) { isOpened ->
-                        if (isOpened) {
-                            TextField(
-                                modifier = Modifier.height(56.dp),
-                                value = searchQuery ?: "",
-                                onValueChange = viewModel::updateSearchQuery,
-                                placeholder = { Text(text = "Search...") },
-                                shape = RoundedCornerShape(size = 99.dp),
-                                textStyle = TextStyle(
-                                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                                ),
-                                colors = TextFieldDefaults.colors(
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                    disabledIndicatorColor = Color.Transparent,
-                                )
-                            )
-                        } else {
-                            Text(text = "To Do")
-                        }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = {}) {
+    Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }, topBar = {
+        TopAppBar(title = {
+            AnimatedContent(
+                targetState = searchBarOpened
+            ) { isOpened ->
+                if (isOpened) {
+                    TextField(
+                        modifier = Modifier.height(56.dp),
+                        value = searchQuery ?: "",
+                        onValueChange = viewModel::updateSearchQuery,
+                        placeholder = { Text(text = "Search...") },
+                        shape = RoundedCornerShape(size = 99.dp),
+                        textStyle = TextStyle(
+                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                        ),
+                        colors = TextFieldDefaults.colors(
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                        )
+                    )
+                } else {
+                    Text(text = "To Do")
+                }
+            }
+        }, navigationIcon = {
+            IconButton(onClick = {}) {
+                Icon(
+                    painter = painterResource(Resource.Icon.HAMBURGER_MENU), contentDescription = "Hamburger menu icon"
+                )
+            }
+        }, actions = {
+            AnimatedContent(
+                targetState = searchBarOpened
+            ) { isOpened ->
+                if (isOpened) {
+                    IconButton(onClick = {
+                        searchBarOpened = false
+                        viewModel.updateSearchQuery(query = "")
+                    }) {
                         Icon(
-                            painter = painterResource(Resource.Icon.HAMBURGER_MENU),
-                            contentDescription = "Hamburger menu icon"
+                            painter = painterResource(Resource.Icon.CLOSE), contentDescription = "Close icon"
                         )
                     }
-                },
-                actions = {
-                    AnimatedContent(
-                        targetState = searchBarOpened
-                    ) { isOpened ->
-                        if (isOpened) {
-                            IconButton(onClick = { searchBarOpened = false }) {
-                                Icon(
-                                    painter = painterResource(Resource.Icon.CLOSE),
-                                    contentDescription = "Close icon"
+                } else {
+                    Row {
+                        Box {
+                            Box(
+                                contentAlignment = Alignment.TopEnd, modifier = Modifier
+                            ) {
+                                IconButton(onClick = { dropdownMenuOpened = true }) {
+                                    Icon(
+                                        painter = painterResource(Resource.Icon.SORT), contentDescription = "Sort icon"
+                                    )
+                                }
+                                if (priorityFilter != Priority.None) Box(
+                                    modifier = Modifier.size(8.dp).offset(x = (- 6).dp, y = 6.dp).clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.error)
                                 )
                             }
-                        } else {
-                            IconButton(onClick = { searchBarOpened = true }) {
-                                Icon(
-                                    painter = painterResource(Resource.Icon.SEARCH),
-                                    contentDescription = "Search icon"
-                                )
+                            DropdownMenu(
+                                expanded = dropdownMenuOpened,
+                                shape = RoundedCornerShape(12.dp),
+                                onDismissRequest = { dropdownMenuOpened = false },
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            ) {
+                                Priority.entries.forEach { priority ->
+                                    DropdownMenuItem(
+                                        modifier = Modifier.background(
+                                        if (priorityFilter == priority && priority != Priority.None) MaterialTheme.colorScheme.outlineVariant
+                                        else MaterialTheme.colorScheme.surfaceVariant
+                                    ), text = { Text(text = priority.name) }, leadingIcon = {
+                                        Box(
+                                            modifier = Modifier.size(16.dp).clip(CircleShape).background(priority.getColor())
+                                        )
+                                    }, onClick = {
+                                        dropdownMenuOpened = false
+                                        viewModel.updatePriorityFilter(priority)
+                                    })
+                                }
                             }
                         }
-                    }
-                }
-            )
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { navigateToTask(null) },
-                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp)
-            ) {
-                Icon(
-                    modifier = Modifier.size(16.dp),
-                    painter = painterResource(Resource.Icon.ADD),
-                    contentDescription = "this is icon"
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "New Task")
-            }
-        }
-    ) { padding ->
-        allTasks.DisplayResult(
-            modifier = Modifier.padding(padding),
-            onLoading = { LoadingCard() },
-            onSuccess = { tasks ->
-                if (tasks.isNotEmpty()) {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(all = 12.dp)
-                    ) {
-                        items(
-                            items = tasks,
-                            key = { it.id },
-                        ) {
-                            TaskCard(
-                                task = it,
-                                onClick = navigateToTask,
-                                onComplete = {
-                                    val isCompleted = ! it.isCompleted
-                                    val result = viewModel.markTaskAsCompleted(
-                                        task = it.copy(isCompleted = ! it.isCompleted)
-                                    )
-
-                                    if (result.isSuccess()) {
-                                        scope.launch {
-                                            snackBarHostState.showSnackbar(
-                                                message = if (isCompleted) "Task marked as complete" else "Task marked as not completed"
-                                            )
-                                        }
-                                    }
-                                },
-                                onDelete = {
-                                    val result = viewModel.removeTask(
-                                        taskId = it.id
-                                    )
-
-                                    if (result.isSuccess()) {
-                                        scope.launch {
-                                            snackBarHostState.showSnackbar(
-                                                message = "Task removed successfully"
-                                            )
-                                        }
-                                    }
-                                }
+                        IconButton(onClick = { searchBarOpened = true }) {
+                            Icon(
+                                painter = painterResource(Resource.Icon.SEARCH), contentDescription = "Search icon"
                             )
                         }
                     }
                 }
-            },
-            onError = { message ->
+            }
+        })
+    }, floatingActionButton = {
+        ExtendedFloatingActionButton(
+            onClick = { navigateToTask(null) }, elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp)
+        ) {
+            Icon(
+                modifier = Modifier.size(16.dp), painter = painterResource(Resource.Icon.ADD), contentDescription = "this is icon"
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(text = "New Task")
+        }
+    }) { padding ->
+        allTasks.DisplayResult(
+            modifier = Modifier.padding(padding), onLoading = { LoadingCard() }, onSuccess = { tasks ->
+            if (tasks.isNotEmpty()) {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp), contentPadding = PaddingValues(all = 12.dp)
+                ) {
+                    items(
+                        items = tasks,
+                        key = { it.id },
+                    ) {
+                        TaskCard(task = it, onClick = navigateToTask, onComplete = {
+                            val isCompleted = ! it.isCompleted
+                            val result = viewModel.markTaskAsCompleted(
+                                task = it.copy(isCompleted = ! it.isCompleted)
+                            )
+
+                            if (result.isSuccess()) {
+                                scope.launch {
+                                    snackBarHostState.showSnackbar(
+                                        message = if (isCompleted) "Task marked as complete" else "Task marked as not completed"
+                                    )
+                                }
+                            }
+                        }, onDelete = {
+                            val result = viewModel.removeTask(
+                                taskId = it.id
+                            )
+
+                            if (result.isSuccess()) {
+                                scope.launch {
+                                    snackBarHostState.showSnackbar(
+                                        message = "Task removed successfully"
+                                    )
+                                }
+                            }
+                        })
+                    }
+                }
+            } else {
                 InfoCard(
-                    message = message,
-                    lightModeIcon = Resource.Image.WARNING_LIGHT,
-                    darkModeIcon = Resource.Image.WARNING_DARK
+                    message = "No tasks found",
+                    lightModeIcon = Resource.Image.PEN_PAPER_LIGHT,
+                    darkModeIcon = Resource.Image.PEN_PAPER_DARK
                 )
-            },
-            transitionSpec = slideInVertically() + fadeIn() togetherWith
-                    slideOutVertically() + fadeOut()
+            }
+        }, onError = { message ->
+            InfoCard(
+                message = message, lightModeIcon = Resource.Image.WARNING_LIGHT, darkModeIcon = Resource.Image.WARNING_DARK
+            )
+        }, transitionSpec = slideInVertically() + fadeIn() togetherWith slideOutVertically() + fadeOut()
         )
     }
 }

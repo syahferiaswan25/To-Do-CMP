@@ -5,7 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.aswan.todo.data.ToDoRepository
+import com.aswan.todo.domain.repository.ToDoRepository
 import com.aswan.todo.domain.Priority
 import com.aswan.todo.domain.ToDoTask
 import com.aswan.todo.util.RequestState

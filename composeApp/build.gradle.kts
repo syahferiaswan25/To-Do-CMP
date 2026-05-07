@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.serialization)
-    //alias(libs.plugins.sqlDelight)
+    alias(libs.plugins.sqlDelight)
 }
 
 kotlin {
@@ -32,7 +32,7 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
-            //implementation(libs.sqldelight.android)
+            implementation(libs.sqldelight.android)
             implementation(libs.navigation3.runtime)
             implementation(libs.navigation3.ui)
             implementation(libs.navigation3.viewmoodel)
@@ -57,10 +57,10 @@ kotlin {
             implementation(libs.koin.navigation3)
 
             implementation(libs.swipeable.kmp)
-            //implementation(libs.sqldelight.coroutine)
+            implementation(libs.sqldelight.coroutine)
         }
         iosMain.dependencies {
-            //implementation(libs.sqldelight.ios)
+            implementation(libs.sqldelight.ios)
             implementation(libs.navigation2)
         }
     }
@@ -97,3 +97,10 @@ dependencies {
     debugImplementation(libs.compose.uiTooling)
 }
 
+sqldelight {
+    databases {
+        create("TaskDatabase") {
+            packageName.set("com.aswan.todo")
+        }
+    }
+}

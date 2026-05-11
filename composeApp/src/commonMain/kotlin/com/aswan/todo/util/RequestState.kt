@@ -1,6 +1,7 @@
 package com.aswan.todo.util
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -41,33 +42,41 @@ fun <T> RequestState<T>.DisplayResult(
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (String) -> Unit)? = null,
     onSuccess: @Composable (T) -> Unit,
-    transitionSpec: ContentTransform? = scaleIn(tween(durationMillis = 400))
-            + fadeIn(tween(durationMillis = 800))
-            togetherWith scaleOut(tween(durationMillis = 400))
-            + fadeOut(tween(durationMillis = 800)),
+    transitionSpec: AnimatedContentTransitionScope<RequestState<T>>.() -> ContentTransform = {
+        (scaleIn(tween(400)) + fadeIn(tween(800)))
+            .togetherWith(
+                scaleOut(tween(400)) + fadeOut(tween(800))
+            )
+    },
     backgroundColor: Color? = null
 ) {
     AnimatedContent(
-        modifier = modifier
-            .background(color = backgroundColor ?: Color.Unspecified),
+        modifier = modifier.background(
+            color = backgroundColor ?: Color.Unspecified
+        ),
         targetState = this,
-        transitionSpec = { transitionSpec ?: (EnterTransition.None togetherWith ExitTransition.None)},
+        transitionSpec = transitionSpec,
         label = "Content Animation"
     ) { state ->
+
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
+
             when (state) {
                 is RequestState.Idle -> {
                     onIdle?.invoke()
                 }
+
                 is RequestState.Loading -> {
                     onLoading?.invoke()
                 }
+
                 is RequestState.Success -> {
                     onSuccess(state.getSuccessData())
                 }
+
                 is RequestState.Error -> {
                     onError?.invoke(state.getErrorMessage())
                 }

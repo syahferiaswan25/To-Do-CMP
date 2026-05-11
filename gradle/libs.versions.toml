@@ -17,6 +17,7 @@ koin = "4.2.0-beta2"
 sqldelight = "2.2.1"
 swipeableKmp = "1.0.5"
 navigation2 = "2.9.1"
+stabilityAnalyzer = "0.7.4"
 
 
 
@@ -62,3 +63,4 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
+stability-analyzer = { id = "com.github.skydoves.compose.stability.analyzer", version.ref = "stabilityAnalyzer" }

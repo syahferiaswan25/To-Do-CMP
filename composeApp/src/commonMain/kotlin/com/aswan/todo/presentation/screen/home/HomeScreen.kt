@@ -177,8 +177,7 @@ fun HomeScreen(
             Text(text = "New Task")
         }
     }) { padding ->
-        allTasks.DisplayResult(
-            modifier = Modifier.padding(padding), onLoading = { LoadingCard() }, onSuccess = { tasks ->
+        allTasks.DisplayResult(modifier = Modifier.padding(padding), onLoading = { LoadingCard() }, onSuccess = { tasks ->
             if (tasks.isNotEmpty()) {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp), contentPadding = PaddingValues(all = 12.dp)
@@ -226,7 +225,6 @@ fun HomeScreen(
             InfoCard(
                 message = message, lightModeIcon = Resource.Image.WARNING_LIGHT, darkModeIcon = Resource.Image.WARNING_DARK
             )
-        }, transitionSpec = slideInVertically() + fadeIn() togetherWith slideOutVertically() + fadeOut()
-        )
+        }, transitionSpec = { slideInVertically() + fadeIn() togetherWith slideOutVertically() + fadeOut() })
     }
 }

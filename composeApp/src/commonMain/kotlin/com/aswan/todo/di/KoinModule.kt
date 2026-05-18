@@ -1,6 +1,5 @@
 package com.aswan.todo.di
 
-import com.aswan.todo.data.FakeToDoRepositoryImpl
 import com.aswan.todo.data.ToDoRepositoryImpl
 import com.aswan.todo.domain.repository.ToDoRepository
 import com.aswan.todo.navigation.Navigator

@@ -5,10 +5,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.aswan.todo.domain.repository.ToDoRepository
 import com.aswan.todo.domain.Priority
 import com.aswan.todo.domain.ToDoTask
 import com.aswan.todo.util.RequestState
+import kotlinx.coroutines.launch
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -29,16 +31,28 @@ class TaskViewModel(
     fun loadData(taskId: String?) {
         if (taskId != null) {
             val existingTask = repository.readSelectedTask(taskId)
-            if (existingTask.isSuccess()) {
-                _uiState.value = TaskUiState(
-                    id = taskId,
-                    title = existingTask.getSuccessData().title,
-                    description = existingTask.getSuccessData().description,
-                    priority = existingTask.getSuccessData().priority
-                )
-            } /*else if (existingTask.isError()) {
-                _uiState.value = RequestState.Error(existingTask.getErrorMessage())
-            }*/
+            viewModelScope.launch {
+                existingTask.collect { res ->
+                    when {
+                        res.isSuccess() -> {
+                            _uiState.value = TaskUiState(
+                                id = taskId,
+                                title = res.getSuccessData().title,
+                                description = res.getSuccessData().description,
+                                priority = res.getSuccessData().priority
+                            )
+                        }
+                        res.isError() -> {
+                            _uiState.value = TaskUiState(
+                                error = res.getErrorMessage()
+                            )
+                        }
+                        else -> {
+                            // todo loading ui
+                        }
+                    }
+                }
+            }
         } else {
             _uiState.value = TaskUiState()
         }
@@ -60,7 +74,6 @@ class TaskViewModel(
             )
         }*/
         _uiState.value = _uiState.value.copy(description = description)
-
     }
 
     fun updatePriority(priority: Priority) {
@@ -77,32 +90,7 @@ class TaskViewModel(
         onSuccess: () -> Unit,
         onError: (String) -> Unit,
     ) {
-        /*if (_uiState.value.isSuccess()) {
-            val uiStateData = _uiState.value.getSuccessData()
-
-            val task = ToDoTask(
-                id = uiStateData.id ?: Uuid.random().toHexString() ,
-                title = uiStateData.title,
-                description = uiStateData.description,
-                priority = uiStateData.priority
-            )
-
-            val result = if (uiStateData.id != null) {
-                repository.updateTask(task)
-            } else {
-                repository.createTask(task)
-            }
-
-            if (result.isSuccess()) {
-                // Handle success, e.g., navigate back or show a success message
-            } else if (result.isError()) {
-                _uiState.value = RequestState.Error(result.getErrorMessage())
-            }
-
-        }*/
-
         val uiStateData = _uiState.value
-
         val task = ToDoTask(
             id = uiStateData.id ?: Uuid.random().toHexString() ,
             title = uiStateData.title,
@@ -110,18 +98,28 @@ class TaskViewModel(
             priority = uiStateData.priority
         )
 
-        val result = if (uiStateData.id != null) {
-            repository.updateTask(task)
-        } else {
-            repository.createTask(task)
-        }
+        viewModelScope.launch {
+            val result = if (uiStateData.id != null) {
+                repository.updateTask(task)
+            } else {
+                repository.createTask(task)
+            }
 
-        if (result.isSuccess()) {
-            // Handle success, e.g., navigate back or show a success message
-            onSuccess()
-        } else if (result.isError()) {
-            onError(result.getErrorMessage())
-           // _uiState.value = result.getErrorMessage()
+            result.collect { res ->
+                when {
+                    res.isSuccess() -> {
+                        // Handle success, e.g., navigate back or show a success message
+                        onSuccess()
+                    }
+                    res.isError() -> {
+                        onError(res.getErrorMessage())
+                        // _uiState.value = result.getErrorMessage()
+                    }
+                    else -> {
+                        // todo loading ui
+                    }
+                }
+            }
         }
     }
 }

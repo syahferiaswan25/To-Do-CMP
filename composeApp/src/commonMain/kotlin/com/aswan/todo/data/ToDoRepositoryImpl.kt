@@ -10,6 +10,7 @@ import com.aswan.todo.domain.repository.ToDoRepository
 import com.aswan.todo.util.RequestState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Clock
@@ -23,52 +24,60 @@ class ToDoRepositoryImpl(
     )
     private val query = database.taskDatabaseQueries
 
-    override fun createTask(task: ToDoTask): RequestState<Unit> {
-        return try {
-            query.insertTask(
-                id = task.id,
-                title = task.title,
-                description = task.description,
-                isCompleted = if (task.isCompleted) 1 else 0,
-                priority = task.priority.name,
-                createdAt = Clock.System.now().toEpochMilliseconds(),
-                updatedAt = Clock.System.now().toEpochMilliseconds(),
-            )
-
-            RequestState.Success(data = Unit)
-        } catch (e: Exception) {
-            RequestState.Error(message = "${e.message}")
-        }
-    }
-
-    override fun updateTask(task: ToDoTask): RequestState<Unit> {
-        return try {
-            query.updateTask(
-                title = task.title,
-                description = task.description,
-                isCompleted = if (task.isCompleted) 1 else 0,
-                priority = task.priority.name,
-                updatedAt = Clock.System.now().toEpochMilliseconds(),
-                id = task.id,
-            )
-            RequestState.Success(data = Unit)
-        } catch (e: Exception) {
-            RequestState.Error(message = "${e.message}")
-        }
-    }
-
-    override fun readSelectedTask(taskId: String): RequestState<ToDoTask> {
-        return try {
-            val task = query.selectTaskById(taskId).executeAsOneOrNull()
-            if (task != null) {
-                RequestState.Success(
-                    data = task.convert()
+    override fun createTask(task: ToDoTask): Flow<RequestState<Unit>> {
+        return flow {
+            try {
+                query.insertTask(
+                    id = task.id,
+                    title = task.title,
+                    description = task.description,
+                    isCompleted = if (task.isCompleted) 1 else 0,
+                    priority = task.priority.name,
+                    createdAt = Clock.System.now().toEpochMilliseconds(),
+                    updatedAt = Clock.System.now().toEpochMilliseconds(),
                 )
-            } else {
-                RequestState.Error(message = "Task not found")
+
+                emit(RequestState.Success(data = Unit))
+            } catch (e: Exception) {
+                emit(RequestState.Error(message = "${e.message}"))
             }
-        } catch (e: Exception) {
-            RequestState.Error(message = "${e.message}")
+        }
+    }
+
+    override fun updateTask(task: ToDoTask): Flow<RequestState<Unit>> {
+        return flow {
+            try {
+                query.updateTask(
+                    title = task.title,
+                    description = task.description,
+                    isCompleted = if (task.isCompleted) 1 else 0,
+                    priority = task.priority.name,
+                    updatedAt = Clock.System.now().toEpochMilliseconds(),
+                    id = task.id,
+                )
+                emit(RequestState.Success(data = Unit))
+            } catch (e: Exception) {
+                emit(RequestState.Error(message = "${e.message}"))
+            }
+        }
+    }
+
+    override fun readSelectedTask(taskId: String): Flow<RequestState<ToDoTask>> {
+        return flow {
+            try {
+                val task = query.selectTaskById(taskId).executeAsOneOrNull()
+                if (task != null) {
+                    emit(
+                        RequestState.Success(
+                            data = task.convert()
+                        )
+                    )
+                } else {
+                    emit(RequestState.Error(message = "Task not found"))
+                }
+            } catch (e: Exception) {
+                emit(RequestState.Error(message = "${e.message}"))
+            }
         }
     }
 
@@ -80,12 +89,14 @@ class ToDoRepositoryImpl(
         }
     }
 
-    override fun removeTask(taskId: String): RequestState<Unit> {
-        return try {
-            query.deleteTaskById(taskId)
-            RequestState.Success(data = Unit)
-        } catch (e: Exception) {
-            RequestState.Error(message = "${e.message}")
+    override fun removeTask(taskId: String): Flow<RequestState<Unit>> {
+        return flow {
+            try {
+                query.deleteTaskById(taskId)
+                emit(RequestState.Success(data = Unit))
+            } catch (e: Exception) {
+                emit(RequestState.Error(message = "${e.message}"))
+            }
         }
     }
 

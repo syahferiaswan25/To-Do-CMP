@@ -188,29 +188,21 @@ fun HomeScreen(
                     ) {
                         TaskCard(task = it, onClick = navigateToTask, onComplete = {
                             val isCompleted = ! it.isCompleted
-                            val result = viewModel.markTaskAsCompleted(
-                                task = it.copy(isCompleted = ! it.isCompleted)
-                            )
-
-                            if (result.isSuccess()) {
+                            viewModel.markTaskAsCompleted(task = it.copy(isCompleted = ! it.isCompleted), onSuccess = {
                                 scope.launch {
                                     snackBarHostState.showSnackbar(
                                         message = if (isCompleted) "Task marked as complete" else "Task marked as not completed"
                                     )
                                 }
-                            }
+                            }, onError = {})
                         }, onDelete = {
-                            val result = viewModel.removeTask(
-                                taskId = it.id
-                            )
-
-                            if (result.isSuccess()) {
+                            viewModel.removeTask(taskId = it.id, onSuccess = {
                                 scope.launch {
                                     snackBarHostState.showSnackbar(
                                         message = "Task removed successfully"
                                     )
                                 }
-                            }
+                            }, onError = {})
                         })
                     }
                 }

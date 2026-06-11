@@ -48,7 +48,8 @@ actual fun NavGraph() {
                 HomeScreen(
                     navigateToTask = { taskId ->
                         navigator.navigateToTask(taskId = taskId)
-                    }
+                    },
+                    resources = Resource
                 )
             }
             entry<Screen.Task>(
@@ -56,6 +57,7 @@ actual fun NavGraph() {
             ) {
                 TaskScreen(
                     id = it.id,
+                    resources = Resource,
                     navigateBack = { navigator.goBack() }
                 )
             }
